@@ -13,7 +13,7 @@
  * ・story_order.json
  * 
  * @author hatotank.net
- * @version 1.0 2016/01/31
+ * @version 1.1 2021/09/05
  */
 //error_reporting(E_ALL & ~E_NOTICE);
 
@@ -29,7 +29,7 @@ $list_csv  = array();
 $tab       = "    ";
 $voicepath = "sounds/stories/";
 $bgmpath   = "bgm/";
-$version   = "1.0";
+$version   = "1.1";
 
 $filename_story_exp = "story_expression.json";
 $filename_story_order = "story_order.json";
@@ -212,8 +212,13 @@ function convertRenpy($i_file,$o_dir,$o_ext,$o_csv,$story_expression_data)
         
         if($event_flg){
             if(isset($cut["card_id"])){
-                
+
                 $event_continue = true;
+                // 連続スチル対応
+                if($prev_card_id != $cut["card_id"]){
+                    $scenario[] = $event_hide;
+                    $event_continue = false;
+                }
             }else{
                 $scenario[] = $event_hide;
                 $event_continue = false;
@@ -343,16 +348,17 @@ function convertRenpy($i_file,$o_dir,$o_ext,$o_csv,$story_expression_data)
                     $event_hide = $tab . "hide ev_" . $cut["card_id"] . "n with dissolve\n";
                     $scenario[] = $tab . "show ev_" . $cut["card_id"] . "n with dissolve\n";
                 }
-               if($index == 1){
-                   $scenario[] = $tab . "play music " . '"' . $bgmpath . $story_bgm . ".mp3" . '" loop' . "\n";
-                   $scenario[] = $tab . "hide background\n";
-                   $scenario[] = $tab . "hide bg_book\n";
+                if($index == 1){
+                    $scenario[] = $tab . "play music " . '"' . $bgmpath . $story_bgm . ".mp3" . '" loop' . "\n";
+                    $scenario[] = $tab . "hide background\n";
+                    $scenario[] = $tab . "hide bg_book\n";
                     $scenario[] = "\n";
                     $opev = true;
                 }
                 $scenario[] = $tab . "pause\n";
             }
             $event_flg = true;
+            $prev_card_id = $cut["card_id"]; // 連続スチル対応
         }
         
         // left-center-right
